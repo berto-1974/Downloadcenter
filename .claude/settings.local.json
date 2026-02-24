@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(taskkill:*)",
+      "Bash(Get-Process node)",
+      "Bash(Stop-Process -Force)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(node server.js:*)"
+    ]
+  }
+}

@@ -1,0 +1,196 @@
+/* ===== Allgemein ===== */
+body {
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* ===== Icon-Kreis (Passwort-Eingabe) ===== */
+.icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Datei-Karte ===== */
+.file-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+/* ===== Thumbnail-Hintergrund: IMMER cremefarben ===== */
+.file-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f5ede0 !important; /* Crème – unveränderlich */
+}
+
+.img-thumbnail-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border: none;
+  border-radius: 0;
+}
+
+.preview-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+/* ===== Buttons & Formularelemente ===== */
+.btn {
+  border-radius: 8px;
+}
+
+.card {
+  border-radius: 12px !important;
+}
+
+.alert {
+  border-radius: 8px;
+  border: none;
+}
+
+.input-group .form-control,
+.input-group .input-group-text {
+  border-radius: 8px !important;
+}
+
+.input-group .input-group-text {
+  border-right: none;
+}
+
+.input-group .form-control {
+  border-left: none;
+}
+
+.input-group .form-control:focus {
+  box-shadow: none;
+}
+
+.input-group > :last-child {
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.input-group > :first-child {
+  border-radius: 8px 0 0 8px !important;
+}
+
+.badge {
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.upload-progress {
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* ===================================================
+   DARK MODE
+   =================================================== */
+[data-bs-theme="dark"] body {
+  background-color: #0f1117;
+  color: #e2e8f0;
+}
+
+[data-bs-theme="dark"] .navbar.bg-primary {
+  background-color: #1a3460 !important;
+}
+
+[data-bs-theme="dark"] .navbar.bg-dark {
+  background-color: #0a0c12 !important;
+  border-bottom: 1px solid #2a2d3a;
+}
+
+[data-bs-theme="dark"] .card {
+  background-color: #1a1d27 !important;
+  border: 1px solid #2a2d3a !important;
+}
+
+[data-bs-theme="dark"] .card-header {
+  background-color: #1a1d27 !important;
+  border-bottom: 1px solid #2a2d3a !important;
+}
+
+[data-bs-theme="dark"] .list-group-item {
+  background-color: #12141e !important;
+  border-color: #2a2d3a !important;
+  color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .file-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55) !important;
+  border-color: #3d4157 !important;
+}
+
+[data-bs-theme="dark"] .drop-zone {
+  border: 2px dashed #3a3d52;
+  background-color: #12141e;
+}
+
+[data-bs-theme="dark"] .drop-zone:hover,
+[data-bs-theme="dark"] .drop-zone.drag-over {
+  border-color: #4f8ef7;
+  background-color: #161928;
+}
+
+[data-bs-theme="dark"] .bg-light:not(.file-preview) {
+  background-color: #12141e !important;
+}
+
+[data-bs-theme="dark"] .modal-content {
+  background-color: #1a1d27 !important;
+  border: 1px solid #2a2d3a !important;
+}
+
+/* ===================================================
+   LIGHT MODE
+   =================================================== */
+[data-bs-theme="light"] body {
+  background-color: #f0f2f5;
+}
+
+[data-bs-theme="light"] .card {
+  background-color: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+[data-bs-theme="light"] .file-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="light"] .drop-zone {
+  border: 2px dashed #ced4da;
+  background-color: #f8f9fa;
+}
+
+[data-bs-theme="light"] .drop-zone:hover,
+[data-bs-theme="light"] .drop-zone.drag-over {
+  border-color: #0d6efd;
+  background-color: #eef3ff;
+}
+
+[data-bs-theme="light"] .bg-light {
+  background-color: #f8f9fa !important;
+}
