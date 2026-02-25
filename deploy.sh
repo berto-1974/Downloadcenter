@@ -26,12 +26,13 @@ echo "=== 4. Dateien kopieren ==="
 # per scp/rsync in /tmp/downloadcenter abgelegt hast.
 # Befehl auf deinem lokalen PC (Beispiel):
 #   scp -r . benutzer@server:/tmp/downloadcenter
-cp -r /tmp/downloadcenter/server.js       "$APP_DIR/"
-cp -r /tmp/downloadcenter/package.json    "$APP_DIR/"
-cp -r /tmp/downloadcenter/database/      "$APP_DIR/"
-cp -r /tmp/downloadcenter/middleware/     "$APP_DIR/"
-cp -r /tmp/downloadcenter/routes/        "$APP_DIR/"
-cp -r /tmp/downloadcenter/public/        "$APP_DIR/"
+cp -r /tmp/downloadcenter/server.js            "$APP_DIR/"
+cp -r /tmp/downloadcenter/package.json         "$APP_DIR/"
+cp -r /tmp/downloadcenter/ecosystem.config.js  "$APP_DIR/"
+cp -r /tmp/downloadcenter/database/            "$APP_DIR/"
+cp -r /tmp/downloadcenter/middleware/          "$APP_DIR/"
+cp -r /tmp/downloadcenter/routes/             "$APP_DIR/"
+cp -r /tmp/downloadcenter/public/             "$APP_DIR/"
 
 # .env NICHT überschreiben falls bereits vorhanden (enthält Passwörter)
 if [ ! -f "$APP_DIR/.env" ]; then
