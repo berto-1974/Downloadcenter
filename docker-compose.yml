@@ -1,20 +1,16 @@
 services:
   downloadcenter:
     build:
-      context: .
-      args:
-        # GH_TOKEN wird aus der .env-Datei gelesen (nur für den Build)
-        GH_TOKEN: ${GH_TOKEN}
+      # Docker klont direkt das private GitHub-Repo (GH_TOKEN wird in Portainer gesetzt)
+      context: "https://oauth2:${GH_TOKEN}@github.com/berto-1974/Downloadcenter.git#main"
     container_name: downloadcenter
     restart: unless-stopped
     ports:
       - "3001:3001"
-
-    # App-Konfiguration aus .env laden
-    env_file:
-      - .env
-
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3001
     volumes:
-      # Uploads und Datenbank bleiben auf dem Host erhalten
-      - ./uploads:/app/uploads
-      - ./database:/app/database
+      - /volume1/docker/Downloadcenter/uploads:/app/uploads
+      - /volume1/docker/Downloadcenter/database:/app/database
