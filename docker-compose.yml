@@ -1,0 +1,20 @@
+services:
+  downloadcenter:
+    build:
+      context: .
+      args:
+        # GH_TOKEN wird aus der .env-Datei gelesen (nur für den Build)
+        GH_TOKEN: ${GH_TOKEN}
+    container_name: downloadcenter
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+
+    # App-Konfiguration aus .env laden
+    env_file:
+      - .env
+
+    volumes:
+      # Uploads und Datenbank bleiben auf dem Host erhalten
+      - ./uploads:/app/uploads
+      - ./database:/app/database
