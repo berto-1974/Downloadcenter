@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
-const { getDb } = require('../database/init');
+const { getDb } = require('../lib/db');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 

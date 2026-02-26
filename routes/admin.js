@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../database/init');
+const { getDb } = require('../lib/db');
 const { requireAdmin } = require('../middleware/auth');
 
 // Sicherstellen, dass der Uploads-Ordner existiert

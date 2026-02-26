@@ -20,7 +20,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', publicRoutes);
 
 // Datenbank beim Start initialisieren
-require('./database/init').getDb();
+require('./lib/db').getDb();
 
 app.listen(PORT, () => {
   console.log(`Download Center läuft auf http://localhost:${PORT}`);
