@@ -6,8 +6,16 @@ body {
 
 /* ===== Navbar ===== */
 .navbar {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.navbar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 /* ===== Icon-Kreis (Passwort-Eingabe) ===== */
