@@ -1,6 +1,9 @@
 # ---- Build Stage: Abhängigkeiten installieren ----
 FROM node:20-alpine AS builder
 
+# Build-Tools für native Module (better-sqlite3 benötigt python3, make, g++)
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 COPY package.json ./
 RUN npm install --omit=dev
@@ -18,13 +21,8 @@ COPY middleware/ ./middleware/
 COPY routes/ ./routes/
 COPY public/ ./public/
 
+# Einhängepunkte für externe Volumes anlegen
 RUN mkdir -p uploads database
-
-# Sicherheit: nicht-root User
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
-    && chown -R appuser:appgroup /app
-
-USER appuser
 
 EXPOSE 3001
 
