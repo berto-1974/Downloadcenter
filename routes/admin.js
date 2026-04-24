@@ -8,6 +8,7 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../lib/db');
 const { requireAdmin } = require('../middleware/auth');
+const { encryptFile } = require('../lib/crypto');
 
 // Sicherstellen, dass der Uploads-Ordner existiert
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
@@ -49,7 +50,8 @@ router.get('/groups', requireAdmin, (req, res) => {
   const db = getDb();
   const groups = db.prepare(`
     SELECT g.id, g.name, g.created_at,
-           COUNT(f.id) AS file_count
+           COUNT(f.id) AS file_count,
+           MAX(COALESCE(f.encrypted, 0)) AS has_encrypted
     FROM upload_groups g
     LEFT JOIN files f ON f.group_id = g.id
     GROUP BY g.id
@@ -70,10 +72,10 @@ router.get('/groups/:id/files', requireAdmin, (req, res) => {
 
 // POST /api/admin/upload — Neue Gruppe erstellen und Dateien hochladen
 router.post('/upload', requireAdmin, upload.array('files'), async (req, res) => {
-  const { groupName, groupPassword } = req.body;
+  const { groupName, groupPassword, encrypt } = req.body;
+  const shouldEncrypt = encrypt === 'true';
 
   if (!groupName || !groupPassword) {
-    // Hochgeladene Dateien wieder löschen
     if (req.files) req.files.forEach(f => fs.unlinkSync(f.path));
     return res.status(400).json({ error: 'Gruppenname und Passwort sind erforderlich' });
   }
@@ -84,21 +86,32 @@ router.post('/upload', requireAdmin, upload.array('files'), async (req, res) => 
 
   try {
     const passwordHash = await bcrypt.hash(groupPassword, 12);
-    const db = getDb();
 
+    // Dateien ggf. verschlüsseln (vor der DB-Transaktion)
+    const fileData = [];
+    for (const file of req.files) {
+      let iv = null;
+      if (shouldEncrypt) {
+        const result = await encryptFile(path.join(UPLOADS_DIR, file.filename));
+        iv = `${result.iv}:${result.authTag}`;
+      }
+      fileData.push({ file, iv });
+    }
+
+    const db = getDb();
     const insertGroup = db.prepare(
       'INSERT INTO upload_groups (name, password_hash) VALUES (?, ?)'
     );
     const insertFile = db.prepare(
-      'INSERT INTO files (group_id, stored_name, original_name, mimetype, size) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO files (group_id, stored_name, original_name, mimetype, size, encrypted, iv) VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
 
     const transaction = db.transaction(() => {
       const result = insertGroup.run(groupName, passwordHash);
       const groupId = result.lastInsertRowid;
 
-      for (const file of req.files) {
-        insertFile.run(groupId, file.filename, file.originalname, file.mimetype, file.size);
+      for (const { file, iv } of fileData) {
+        insertFile.run(groupId, file.filename, file.originalname, file.mimetype, file.size, shouldEncrypt ? 1 : 0, iv);
       }
 
       return groupId;
@@ -107,7 +120,6 @@ router.post('/upload', requireAdmin, upload.array('files'), async (req, res) => 
     const groupId = transaction();
     res.status(201).json({ message: 'Upload erfolgreich', groupId });
   } catch (err) {
-    // Dateien bei Fehler aufräumen
     req.files.forEach(f => { try { fs.unlinkSync(f.path); } catch {} });
     console.error(err);
     res.status(500).json({ error: 'Interner Serverfehler' });

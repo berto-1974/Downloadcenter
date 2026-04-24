@@ -168,9 +168,11 @@ async function handleUpload(e) {
   btn.disabled = true;
 
   try {
+    const encrypt = document.getElementById('encryptFiles').checked;
     const formData = new FormData();
     formData.append('groupName', groupName);
     formData.append('groupPassword', groupPassword);
+    formData.append('encrypt', encrypt ? 'true' : 'false');
     selectedFiles.forEach(f => formData.append('files', f));
 
     const res = await fetch('/api/admin/upload', {
@@ -198,6 +200,7 @@ async function handleUpload(e) {
     document.getElementById('groupName').value = '';
     document.getElementById('groupPassword').value = '';
     document.getElementById('fileInput').value = '';
+    document.getElementById('encryptFiles').checked = false;
     selectedFiles = [];
     renderFileList();
 
@@ -268,6 +271,7 @@ function createGroupCard(group) {
           <div>
             <span class="fw-semibold">${escapeHtml(group.name)}</span>
             <span class="badge bg-primary ms-2">${group.file_count} Datei${group.file_count !== 1 ? 'en' : ''}</span>
+            ${group.has_encrypted ? '<span class="badge bg-warning text-dark ms-1"><i class="bi bi-lock-fill me-1"></i>Verschlüsselt</span>' : ''}
             <small class="text-muted d-block mt-1"><i class="bi bi-calendar3 me-1"></i>${date}</small>
           </div>
           <div class="d-flex gap-2">
@@ -321,6 +325,7 @@ async function toggleGroupFiles(groupId) {
               <i class="bi bi-file-earmark text-secondary flex-shrink-0"></i>
               <span class="small text-truncate">${escapeHtml(f.original_name)}</span>
               <span class="text-muted small flex-shrink-0">${formatFileSize(f.size)}</span>
+              ${f.encrypted ? '<i class="bi bi-lock-fill text-warning flex-shrink-0" title="Verschlüsselt"></i>' : ''}
             </div>
             <div class="d-flex gap-1 flex-shrink-0 ms-2">
               <a href="/api/download/${f.id}" class="btn btn-outline-primary btn-sm" download title="Herunterladen">

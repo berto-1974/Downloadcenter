@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
 const { getDb } = require('../lib/db');
+const { decryptStream } = require('../lib/crypto');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 
@@ -54,7 +55,15 @@ router.get('/download/:fileId', (req, res) => {
 
   res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file.original_name)}"`);
   res.setHeader('Content-Type', file.mimetype);
-  res.sendFile(filePath);
+
+  if (file.encrypted && file.iv) {
+    const [ivHex, authTagHex] = file.iv.split(':');
+    const stream = decryptStream(filePath, ivHex, authTagHex);
+    stream.on('error', () => res.status(500).end());
+    stream.pipe(res);
+  } else {
+    res.sendFile(filePath);
+  }
 });
 
 // GET /api/preview/:fileId — Bildvorschau (nur für Bilder)
@@ -74,7 +83,15 @@ router.get('/preview/:fileId', (req, res) => {
   }
 
   res.setHeader('Content-Type', file.mimetype);
-  res.sendFile(filePath);
+
+  if (file.encrypted && file.iv) {
+    const [ivHex, authTagHex] = file.iv.split(':');
+    const stream = decryptStream(filePath, ivHex, authTagHex);
+    stream.on('error', () => res.status(500).end());
+    stream.pipe(res);
+  } else {
+    res.sendFile(filePath);
+  }
 });
 
 // DELETE /api/files/:fileId — Datei löschen (öffentlich, mit Passwort-Bestätigung)
