@@ -139,62 +139,74 @@ body {
 }
 
 /* ===================================================
-   DARK MODE
+   DARK MODE — Glassmorphismus über Mesh-Gradient-Hintergrund
    =================================================== */
 [data-bs-theme="dark"] body {
-  background-color: #0f1117;
+  background-color: transparent;
   color: #e2e8f0;
 }
 
 [data-bs-theme="dark"] .navbar.bg-primary {
-  background-color: #1a3460 !important;
+  background-color: rgba(26, 52, 96, 0.80) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 [data-bs-theme="dark"] .navbar.bg-dark {
-  background-color: #0a0c12 !important;
-  border-bottom: 1px solid #2a2d3a;
+  background-color: rgba(8, 10, 16, 0.80) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 [data-bs-theme="dark"] .card {
-  background-color: #1a1d27 !important;
-  border: 1px solid #2a2d3a !important;
+  background-color: rgba(18, 21, 35, 0.72) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
 [data-bs-theme="dark"] .card-header {
-  background-color: #1a1d27 !important;
-  border-bottom: 1px solid #2a2d3a !important;
+  background-color: rgba(18, 21, 35, 0.0) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
 }
 
 [data-bs-theme="dark"] .list-group-item {
-  background-color: #12141e !important;
-  border-color: #2a2d3a !important;
+  background-color: rgba(10, 12, 22, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
   color: #e2e8f0 !important;
 }
 
 [data-bs-theme="dark"] .file-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55) !important;
-  border-color: #3d4157 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.60) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 [data-bs-theme="dark"] .drop-zone {
-  border: 2px dashed #3a3d52;
-  background-color: #12141e;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  background-color: rgba(10, 12, 22, 0.40);
 }
 
 [data-bs-theme="dark"] .drop-zone:hover,
 [data-bs-theme="dark"] .drop-zone.drag-over {
   border-color: #4f8ef7;
-  background-color: #161928;
+  background-color: rgba(79, 142, 247, 0.08);
 }
 
 [data-bs-theme="dark"] .bg-light:not(.file-preview) {
-  background-color: #12141e !important;
+  background-color: rgba(10, 12, 22, 0.50) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 [data-bs-theme="dark"] .modal-content {
-  background-color: #1a1d27 !important;
-  border: 1px solid #2a2d3a !important;
+  background-color: rgba(14, 16, 28, 0.88) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ===================================================
