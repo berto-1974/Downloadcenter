@@ -1,8 +1,8 @@
 services:
   downloadcenter:
     build:
-      # Docker klont direkt das private GitHub-Repo (GH_TOKEN wird in Portainer gesetzt)
-      context: "https://oauth2:${GH_TOKEN}@github.com/berto-1974/Downloadcenter.git#main"
+      # Docker klont direkt das öffentliche GitHub-Repo
+      context: "https://github.com/berto-1974/Downloadcenter.git#main"
     container_name: downloadcenter
     restart: unless-stopped
     ports:
