@@ -10,6 +10,7 @@ services:
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       PORT: 3001
     volumes:
       - /volume1/docker/Downloadcenter/uploads:/app/uploads

@@ -7,6 +7,7 @@ Eine passwortgeschützte Dateiablage- und Download-Webanwendung auf Basis von No
 - **Gruppen-basierter Zugriff** — Dateien werden in passwortgeschützten Gruppen organisiert
 - **Öffentlicher Download-Bereich** — Nutzer geben ihr Gruppenpasswort ein und laden Dateien herunter
 - **Admin-Dashboard** — Gruppen erstellen, Dateien hochladen und alles verwalten
+- **Datei-Verschlüsselung** — optionale AES-256-GCM-Verschlüsselung pro Gruppe beim Upload
 - **Bild-Vorschau** — Bilder werden inline angezeigt (Lazy Loading)
 - **Drag & Drop Upload** — bis zu 500 MB pro Datei
 - **Dark-/Light-Mode** — Theme-Umschalter mit lokalem Speicher
@@ -56,6 +57,7 @@ Dann `.env` anpassen:
 ```env
 ADMIN_PASSWORD=sicheres-passwort-hier
 JWT_SECRET=langer-zufaelliger-string-hier
+ENCRYPTION_KEY=noch-ein-langer-zufaelliger-string-hier
 PORT=3001
 ```
 
@@ -77,7 +79,7 @@ Die Anwendung ist anschließend unter `http://localhost:3001` erreichbar.
 
 ```bash
 cp .env.example .env
-# .env anpassen (ADMIN_PASSWORD, JWT_SECRET)
+# .env anpassen (ADMIN_PASSWORD, JWT_SECRET, ENCRYPTION_KEY)
 
 docker compose up -d
 ```
@@ -89,9 +91,11 @@ Die Daten (Uploads + Datenbank) werden in Docker-Volumes persistiert.
 | Variable | Beschreibung | Standard |
 |---|---|---|
 | `ADMIN_PASSWORD` | Passwort für den Admin-Login | — |
-| `JWT_SECRET` | Geheimer Schlüssel für JWT-Token | — |
+| `JWT_SECRET` | Geheimer Schlüssel zum Signieren von Admin-JWT-Tokens | — |
+| `ENCRYPTION_KEY` | Schlüssel für die AES-256-GCM-Datei­verschlüsselung (empfohlen, min. 32 Zeichen) | Fallback auf `JWT_SECRET` |
 | `PORT` | Port des HTTP-Servers | `3001` |
-| `GH_TOKEN` | GitHub-Token (nur für Docker-Builds aus privaten Repos) | — |
+
+> **Hinweis zu `JWT_SECRET` und `ENCRYPTION_KEY`:** Beide Variablen sollten immer gesetzt und voneinander verschieden sein. `JWT_SECRET` sichert die Admin-Session, `ENCRYPTION_KEY` schützt die auf dem Server gespeicherten Dateien. Werden beide getrennt gehalten, hat eine Kompromittierung einer Variable keinen Einfluss auf den anderen Bereich.
 
 ## Projektstruktur
 
@@ -99,6 +103,7 @@ Die Daten (Uploads + Datenbank) werden in Docker-Volumes persistiert.
 Downloadcenter/
 ├── server.js              # Einstiegspunkt der Anwendung
 ├── lib/db.js              # Datenbankverbindung & Schema
+├── lib/crypto.js          # AES-256-GCM Verschlüsselung/Entschlüsselung
 ├── middleware/auth.js     # JWT-Middleware
 ├── routes/
 │   ├── admin.js           # Admin-API-Endpunkte
