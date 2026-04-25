@@ -96,29 +96,34 @@ router.get('/preview/:fileId', (req, res) => {
 
 // DELETE /api/files/:fileId — Datei löschen (öffentlich, mit Passwort-Bestätigung)
 router.delete('/files/:fileId', async (req, res) => {
-  const { password } = req.body;
-  if (!password) {
-    return res.status(400).json({ error: 'Passwort erforderlich' });
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Passwort erforderlich' });
+    }
+
+    const db = getDb();
+    const file = db.prepare(`
+      SELECT f.*, g.password_hash
+      FROM files f
+      JOIN upload_groups g ON g.id = f.group_id
+      WHERE f.id = ?
+    `).get(req.params.fileId);
+
+    if (!file) return res.status(404).json({ error: 'Datei nicht gefunden' });
+
+    const match = await bcrypt.compare(password, file.password_hash);
+    if (!match) return res.status(401).json({ error: 'Falsches Passwort' });
+
+    const filePath = path.join(UPLOADS_DIR, file.stored_name);
+    try { fs.unlinkSync(filePath); } catch {}
+
+    db.prepare('DELETE FROM files WHERE id = ?').run(file.id);
+    res.json({ message: 'Datei gelöscht' });
+  } catch (err) {
+    console.error('Datei-Lösch-Fehler:', err);
+    res.status(500).json({ error: 'Interner Serverfehler' });
   }
-
-  const db = getDb();
-  const file = db.prepare(`
-    SELECT f.*, g.password_hash
-    FROM files f
-    JOIN upload_groups g ON g.id = f.group_id
-    WHERE f.id = ?
-  `).get(req.params.fileId);
-
-  if (!file) return res.status(404).json({ error: 'Datei nicht gefunden' });
-
-  const match = await bcrypt.compare(password, file.password_hash);
-  if (!match) return res.status(401).json({ error: 'Falsches Passwort' });
-
-  const filePath = path.join(UPLOADS_DIR, file.stored_name);
-  try { fs.unlinkSync(filePath); } catch {}
-
-  db.prepare('DELETE FROM files WHERE id = ?').run(file.id);
-  res.json({ message: 'Datei gelöscht' });
 });
 
 module.exports = router;

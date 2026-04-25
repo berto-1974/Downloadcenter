@@ -6,12 +6,13 @@ Eine passwortgeschützte Dateiablage- und Download-Webanwendung auf Basis von No
 
 - **Gruppen-basierter Zugriff** — Dateien werden in passwortgeschützten Gruppen organisiert
 - **Öffentlicher Download-Bereich** — Nutzer geben ihr Gruppenpasswort ein und laden Dateien herunter
-- **Admin-Dashboard** — Gruppen erstellen, Dateien hochladen und alles verwalten
+- **Admin-Dashboard** — Gruppen erstellen, Dateien hochladen, nachträglich Dateien hinzufügen und alles verwalten
+- **Passwort-Verwaltung** — Admin-Passwort direkt im Admin-Bereich änderbar, wird verschlüsselt in der Datenbank gespeichert
 - **Datei-Verschlüsselung** — optionale AES-256-GCM-Verschlüsselung pro Gruppe beim Upload
-- **Bild-Vorschau** — Bilder werden inline angezeigt (Lazy Loading)
+- **Bild-Vorschau** — Bilder werden inline angezeigt (Lazy Loading), Dateityp-Labels für alle anderen Formate
 - **Drag & Drop Upload** — bis zu 500 MB pro Datei
 - **Dark-/Light-Mode** — Theme-Umschalter mit lokalem Speicher
-- **Docker-ready** — Docker Compose für einfaches Deployment
+- **Docker-ready** — Docker Compose mit Named Volumes für einfaches Deployment
 - **Lightweight** — SQLite als Datenbank, kein externer Datenbankserver nötig
 
 ## Tech Stack
@@ -55,9 +56,13 @@ cp .env.example .env
 Dann `.env` anpassen:
 
 ```env
-ADMIN_PASSWORD=sicheres-passwort-hier
-JWT_SECRET=langer-zufaelliger-string-hier
-ENCRYPTION_KEY=noch-ein-langer-zufaelliger-string-hier
+# Standard-Passwort ist "Admin" — direkt nach dem ersten Login in der Admin-UI ändern
+ADMIN_PASSWORD=Admin
+
+# Beide Schlüssel durch eigene, lange Zufallsstrings ersetzen
+JWT_SECRET=Bitte_JWT_SECRET_ändern
+ENCRYPTION_KEY=Bitte_ENCRYPTION_KEY_ändern
+
 PORT=3001
 ```
 
@@ -84,7 +89,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Die Daten (Uploads + Datenbank) werden in **Named Volumes** (`dc_uploads`, `dc_database`) persistiert, die Docker intern verwaltet.
+Die Daten (Uploads + Datenbank) werden in **Named Volumes** (`dlc_uploads`, `dlc_database`) persistiert, die Docker intern verwaltet.
 
 Wer eigene Host-Pfade bevorzugt (z. B. auf einem NAS), ersetzt die Volume-Sektion in der `docker-compose.yml`:
 
@@ -100,12 +105,12 @@ volumes:
 
 | Variable | Beschreibung | Standard |
 |---|---|---|
-| `ADMIN_PASSWORD` | Passwort für den Admin-Login | — |
-| `JWT_SECRET` | Geheimer Schlüssel zum Signieren von Admin-JWT-Tokens | — |
-| `ENCRYPTION_KEY` | Schlüssel für die AES-256-GCM-Datei­verschlüsselung (empfohlen, min. 32 Zeichen) | Fallback auf `JWT_SECRET` |
+| `ADMIN_PASSWORD` | Passwort für den Admin-Login — kann nach dem ersten Login in der Admin-UI geändert werden | `Admin` |
+| `JWT_SECRET` | Geheimer Schlüssel zum Signieren von Admin-JWT-Tokens — **muss** gesetzt werden | `Bitte_JWT_SECRET_ändern` |
+| `ENCRYPTION_KEY` | Schlüssel für die AES-256-GCM-Datei­verschlüsselung (min. 32 Zeichen) — **muss** gesetzt werden | `Bitte_ENCRYPTION_KEY_ändern` |
 | `PORT` | Port des HTTP-Servers | `3001` |
 
-> **Hinweis zu `JWT_SECRET` und `ENCRYPTION_KEY`:** Beide Variablen sollten immer gesetzt und voneinander verschieden sein. `JWT_SECRET` sichert die Admin-Session, `ENCRYPTION_KEY` schützt die auf dem Server gespeicherten Dateien. Werden beide getrennt gehalten, hat eine Kompromittierung einer Variable keinen Einfluss auf den anderen Bereich.
+> **Wichtig:** `JWT_SECRET` und `ENCRYPTION_KEY` müssen vor dem produktiven Betrieb durch eigene, lange Zufallsstrings ersetzt werden. Solange die Platzhalterwerte aktiv sind, ist die Installation nicht sicher. Das Admin-Passwort kann jederzeit über den Admin-Bereich geändert werden — der neue Hash wird in der Datenbank gespeichert.
 
 ## Projektstruktur
 
@@ -145,8 +150,10 @@ Downloadcenter/
 | Methode | Pfad | Beschreibung |
 |---|---|---|
 | `POST` | `/api/admin/login` | Einloggen → JWT |
+| `POST` | `/api/admin/change-password` | Admin-Passwort ändern |
 | `GET` | `/api/admin/groups` | Alle Gruppen auflisten |
 | `POST` | `/api/admin/upload` | Neue Gruppe + Dateien hochladen |
+| `POST` | `/api/admin/groups/:id/files` | Dateien zu bestehender Gruppe hinzufügen |
 | `DELETE` | `/api/admin/groups/:id` | Gruppe löschen |
 | `DELETE` | `/api/admin/files/:id` | Einzelne Datei löschen |
 

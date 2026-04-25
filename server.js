@@ -1,15 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const crypto = require('crypto');
-
-// JWT_SECRET: Pflicht für Admin-Sessions — auto-generieren wenn nicht gesetzt
-if (!process.env.JWT_SECRET) {
-  process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
-  console.warn('[WARNUNG] JWT_SECRET nicht gesetzt — zufälliger Schlüssel wird verwendet.');
-  console.warn('          Admin-Sessions werden bei jedem Neustart ungültig.');
-  console.warn('          Bitte JWT_SECRET in der .env-Datei setzen.');
-}
 
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');

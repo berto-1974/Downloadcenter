@@ -799,3 +799,27 @@ body {
 
 @keyframes gradient-angle { to { --gradient-angle: 360deg; } }
 @keyframes shimmer         { to { rotate: 360deg; } }
+
+/* ===== Footer ===== */
+.dc-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 0.55rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  pointer-events: none;
+  z-index: 10;
+}
+
+[data-bs-theme="dark"] .dc-footer {
+  color: rgba(255,255,255,0.18);
+  background: linear-gradient(to top, rgba(9,9,11,0.72) 0%, transparent 100%);
+}
+
+[data-bs-theme="light"] .dc-footer {
+  color: rgba(0,0,0,0.28);
+  background: linear-gradient(to top, rgba(243,244,248,0.85) 0%, transparent 100%);
+}
