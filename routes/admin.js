@@ -126,6 +126,51 @@ router.post('/upload', requireAdmin, upload.array('files'), async (req, res) => 
   }
 });
 
+// POST /api/admin/groups/:id/files — Dateien zu bestehender Gruppe hinzufügen
+router.post('/groups/:id/files', requireAdmin, upload.array('files'), async (req, res) => {
+  const db = getDb();
+  const group = db.prepare('SELECT * FROM upload_groups WHERE id = ?').get(req.params.id);
+
+  if (!group) {
+    if (req.files) req.files.forEach(f => { try { fs.unlinkSync(f.path); } catch {} });
+    return res.status(404).json({ error: 'Gruppe nicht gefunden' });
+  }
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: 'Mindestens eine Datei ist erforderlich' });
+  }
+
+  const shouldEncrypt = req.body.encrypt === 'true';
+
+  try {
+    const fileData = [];
+    for (const file of req.files) {
+      let iv = null;
+      if (shouldEncrypt) {
+        const result = await encryptFile(path.join(UPLOADS_DIR, file.filename));
+        iv = `${result.iv}:${result.authTag}`;
+      }
+      fileData.push({ file, iv });
+    }
+
+    const insertFile = db.prepare(
+      'INSERT INTO files (group_id, stored_name, original_name, mimetype, size, encrypted, iv) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    db.transaction(() => {
+      for (const { file, iv } of fileData) {
+        insertFile.run(group.id, file.filename, file.originalname, file.mimetype, file.size, shouldEncrypt ? 1 : 0, iv);
+      }
+    })();
+
+    res.status(201).json({ message: `${req.files.length} Datei(en) hinzugefügt`, count: req.files.length });
+  } catch (err) {
+    req.files.forEach(f => { try { fs.unlinkSync(f.path); } catch {} });
+    console.error(err);
+    res.status(500).json({ error: 'Interner Serverfehler' });
+  }
+});
+
 // DELETE /api/admin/groups/:id — Gruppe und alle zugehörigen Dateien löschen
 router.delete('/groups/:id', requireAdmin, (req, res) => {
   const db = getDb();

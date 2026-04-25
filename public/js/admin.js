@@ -1,5 +1,6 @@
 let adminToken = null;
 let selectedFiles = [];
+let selectedAddFiles = {};
 let deleteGroupId = null;
 let deleteAdminFileId = null;
 let deleteGroupModal = null;
@@ -298,11 +299,18 @@ async function toggleGroupFiles(groupId) {
   if (!container.classList.contains('d-none')) {
     container.classList.add('d-none');
     btn.querySelector('i').className = 'bi bi-chevron-down';
+    delete selectedAddFiles[groupId];
     return;
   }
 
   container.classList.remove('d-none');
   btn.querySelector('i').className = 'bi bi-chevron-up';
+
+  await loadGroupFilesContent(groupId);
+}
+
+async function loadGroupFilesContent(groupId) {
+  const container = document.getElementById(`group-files-${groupId}`);
   container.innerHTML = '<span class="spinner-border spinner-border-sm text-primary"></span>';
 
   try {
@@ -311,38 +319,68 @@ async function toggleGroupFiles(groupId) {
     });
     const data = await res.json();
 
+    let filesHtml = '';
     if (data.files.length === 0) {
-      container.innerHTML = '<p class="text-muted small mb-0">Keine Dateien in dieser Gruppe.</p>';
-      return;
-    }
-
-    container.innerHTML = `
-      <div class="list-group list-group-flush">
-        ${data.files.map(f => `
-          <div class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center"
-               id="admin-file-${f.id}">
-            <div class="d-flex align-items-center gap-3 min-w-0">
-              ${fileThumbnail(f)}
-              <div class="min-w-0">
-                <div class="small text-truncate fw-medium">${escapeHtml(f.original_name)}</div>
-                <div class="d-flex align-items-center gap-2 mt-1">
-                  <span class="file-meta">${formatFileSize(f.size)}</span>
-                  ${f.encrypted ? '<i class="bi bi-lock-fill text-warning" style="font-size:.7rem" title="Verschlüsselt"></i>' : ''}
+      filesHtml = '<p class="text-muted small mb-2">Keine Dateien in dieser Gruppe.</p>';
+    } else {
+      filesHtml = `
+        <div class="list-group list-group-flush mb-3">
+          ${data.files.map(f => `
+            <div class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center"
+                 id="admin-file-${f.id}">
+              <div class="d-flex align-items-center gap-3 min-w-0">
+                ${fileThumbnail(f)}
+                <div class="min-w-0">
+                  <div class="small text-truncate fw-medium">${escapeHtml(f.original_name)}</div>
+                  <div class="d-flex align-items-center gap-2 mt-1">
+                    <span class="file-meta">${formatFileSize(f.size)}</span>
+                    ${f.encrypted ? '<i class="bi bi-lock-fill text-warning" style="font-size:.7rem" title="Verschlüsselt"></i>' : ''}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="d-flex gap-1 flex-shrink-0 ms-3">
-              <a href="/api/download/${f.id}" class="btn btn-outline-primary btn-sm" download title="Herunterladen">
-                <i class="bi bi-download"></i>
-              </a>
-              <button class="btn btn-outline-danger btn-sm admin-delete-file-btn"
-                      data-id="${f.id}" data-name="${escapeHtml(f.original_name)}"
-                      title="Löschen">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          </div>`).join('')}
+              <div class="d-flex gap-1 flex-shrink-0 ms-3">
+                <a href="/api/download/${f.id}" class="btn btn-outline-primary btn-sm" download title="Herunterladen">
+                  <i class="bi bi-download"></i>
+                </a>
+                <button class="btn btn-outline-danger btn-sm admin-delete-file-btn"
+                        data-id="${f.id}" data-name="${escapeHtml(f.original_name)}"
+                        title="Löschen">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    const addSectionHtml = `
+      <div class="border-top pt-3">
+        <p class="small fw-semibold mb-2 text-muted">
+          <i class="bi bi-plus-circle me-1"></i>Dateien hinzufügen
+        </p>
+        <div id="add-files-list-${groupId}" class="mb-2"></div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <label class="btn btn-outline-secondary btn-sm" for="add-file-input-${groupId}">
+            <i class="bi bi-folder2-open me-1"></i>Dateien wählen
+          </label>
+          <input type="file" id="add-file-input-${groupId}" class="d-none" multiple>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="add-encrypt-${groupId}" role="switch">
+            <label class="form-check-label small" for="add-encrypt-${groupId}">
+              <i class="bi bi-lock me-1"></i>Verschlüsseln
+            </label>
+          </div>
+          <button class="btn btn-primary btn-sm" id="add-submit-${groupId}">
+            <span class="spinner-border spinner-border-sm me-1 d-none" id="add-spinner-${groupId}"></span>
+            <i class="bi bi-upload me-1" id="add-icon-${groupId}"></i>Hinzufügen
+          </button>
+        </div>
+        <div id="add-error-${groupId}" class="alert alert-danger mt-2 d-none py-2 small"></div>
+        <div id="add-success-${groupId}" class="alert alert-success mt-2 d-none py-2 small"></div>
       </div>`;
+
+    container.innerHTML = filesHtml + addSectionHtml;
+
+    selectedAddFiles[groupId] = [];
 
     container.querySelectorAll('.admin-delete-file-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -351,8 +389,121 @@ async function toggleGroupFiles(groupId) {
         deleteFileModal.show();
       });
     });
+
+    document.getElementById(`add-file-input-${groupId}`).addEventListener('change', (e) => {
+      selectedAddFiles[groupId] = [...(selectedAddFiles[groupId] || []), ...Array.from(e.target.files)];
+      e.target.value = '';
+      renderAddFileList(groupId);
+    });
+
+    document.getElementById(`add-submit-${groupId}`).addEventListener('click', () => {
+      addFilesToGroup(groupId);
+    });
   } catch {
     container.innerHTML = '<p class="text-danger small">Fehler beim Laden der Dateien.</p>';
+  }
+}
+
+function renderAddFileList(groupId) {
+  const container = document.getElementById(`add-files-list-${groupId}`);
+  if (!container) return;
+  const files = selectedAddFiles[groupId] || [];
+  if (files.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = `
+    <div class="list-group mb-1">
+      ${files.map((f, i) => `
+        <div class="list-group-item bg-transparent px-2 py-1 d-flex justify-content-between align-items-center">
+          <span class="small text-truncate me-2">${escapeHtml(f.name)}</span>
+          <span class="text-muted small flex-shrink-0 me-2">${formatFileSize(f.size)}</span>
+          <button type="button" class="btn btn-link text-danger btn-sm p-0 flex-shrink-0"
+                  onclick="removeAddFile('${groupId}', ${i})">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>`).join('')}
+    </div>
+    <p class="text-muted small mb-0">${files.length} Datei${files.length !== 1 ? 'en' : ''} ausgewählt</p>`;
+}
+
+function removeAddFile(groupId, index) {
+  if (selectedAddFiles[groupId]) {
+    selectedAddFiles[groupId].splice(index, 1);
+    renderAddFileList(groupId);
+  }
+}
+
+async function addFilesToGroup(groupId) {
+  const files = selectedAddFiles[groupId] || [];
+  const errorEl = document.getElementById(`add-error-${groupId}`);
+  const successEl = document.getElementById(`add-success-${groupId}`);
+  const spinner = document.getElementById(`add-spinner-${groupId}`);
+  const icon = document.getElementById(`add-icon-${groupId}`);
+  const btn = document.getElementById(`add-submit-${groupId}`);
+
+  errorEl.classList.add('d-none');
+  successEl.classList.add('d-none');
+
+  if (files.length === 0) {
+    errorEl.textContent = 'Bitte mindestens eine Datei auswählen.';
+    errorEl.classList.remove('d-none');
+    return;
+  }
+
+  spinner.classList.remove('d-none');
+  icon.classList.add('d-none');
+  btn.disabled = true;
+
+  try {
+    const encrypt = document.getElementById(`add-encrypt-${groupId}`).checked;
+    const formData = new FormData();
+    formData.append('encrypt', encrypt ? 'true' : 'false');
+    files.forEach(f => formData.append('files', f));
+
+    const res = await fetch(`/api/admin/groups/${groupId}/files`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${adminToken}` },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) { logout(); return; }
+      errorEl.textContent = data.error || 'Upload fehlgeschlagen';
+      errorEl.classList.remove('d-none');
+      return;
+    }
+
+    selectedAddFiles[groupId] = [];
+
+    // Dateianzahl-Badge aktualisieren
+    const badge = document.querySelector(`#group-card-${groupId} .badge.bg-primary`);
+    if (badge) {
+      const res2 = await fetch('/api/admin/groups', {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      const groups = await res2.json();
+      const updated = groups.find(g => g.id == groupId);
+      if (updated) {
+        badge.textContent = `${updated.file_count} Datei${updated.file_count !== 1 ? 'en' : ''}`;
+      }
+    }
+
+    await loadGroupFilesContent(groupId);
+
+    const successElNew = document.getElementById(`add-success-${groupId}`);
+    if (successElNew) {
+      successElNew.textContent = `${data.count} Datei${data.count !== 1 ? 'en' : ''} erfolgreich hinzugefügt.`;
+      successElNew.classList.remove('d-none');
+    }
+  } catch {
+    errorEl.textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.';
+    errorEl.classList.remove('d-none');
+    spinner.classList.add('d-none');
+    icon.classList.remove('d-none');
+    btn.disabled = false;
   }
 }
 
