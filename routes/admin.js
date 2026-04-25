@@ -33,16 +33,42 @@ const upload = multer({
 // POST /api/admin/login
 router.post('/login', async (req, res) => {
   const { password } = req.body;
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Falsches Passwort' });
+  if (!password) return res.status(401).json({ error: 'Falsches Passwort' });
+
+  const db = getDb();
+  const setting = db.prepare('SELECT value FROM settings WHERE key = ?').get('admin_password_hash');
+
+  const valid = setting
+    ? await bcrypt.compare(password, setting.value)
+    : password === process.env.ADMIN_PASSWORD;
+
+  if (!valid) return res.status(401).json({ error: 'Falsches Passwort' });
+
+  const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '24h' });
+  res.json({ token });
+});
+
+// POST /api/admin/change-password
+router.post('/change-password', requireAdmin, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'Neues Passwort muss mindestens 4 Zeichen haben' });
   }
 
-  const token = jwt.sign(
-    { role: 'admin' },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
-  res.json({ token });
+  const db = getDb();
+  const setting = db.prepare('SELECT value FROM settings WHERE key = ?').get('admin_password_hash');
+
+  const valid = setting
+    ? await bcrypt.compare(currentPassword, setting.value)
+    : currentPassword === process.env.ADMIN_PASSWORD;
+
+  if (!valid) return res.status(401).json({ error: 'Aktuelles Passwort falsch' });
+
+  const hash = await bcrypt.hash(newPassword, 12);
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('admin_password_hash', hash);
+
+  res.json({ message: 'Passwort erfolgreich geändert' });
 });
 
 // GET /api/admin/groups — Alle Gruppen mit Dateianzahl anzeigen

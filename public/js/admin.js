@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
   document.getElementById('logoutBtn').addEventListener('click', logout);
   document.getElementById('uploadForm').addEventListener('submit', handleUpload);
+  document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
   document.getElementById('refreshBtn').addEventListener('click', loadGroups);
   document.getElementById('generatePwBtn').addEventListener('click', generatePassword);
   document.getElementById('copyPwBtn').addEventListener('click', copyPassword);
@@ -96,6 +97,59 @@ function logout() {
   document.getElementById('loginSection').classList.remove('d-none');
   document.getElementById('logoutBtn').classList.add('d-none');
   document.getElementById('adminPassword').value = '';
+}
+
+// --- Passwort ändern ---
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const current = document.getElementById('currentPassword').value;
+  const newPw   = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  const errorEl   = document.getElementById('changePwError');
+  const successEl = document.getElementById('changePwSuccess');
+  const spinner   = document.getElementById('changePwSpinner');
+  const icon      = document.getElementById('changePwIcon');
+  const btn       = document.getElementById('changePwBtn');
+
+  errorEl.classList.add('d-none');
+  successEl.classList.add('d-none');
+
+  if (newPw !== confirm) {
+    errorEl.textContent = 'Die neuen Passwörter stimmen nicht überein.';
+    errorEl.classList.remove('d-none');
+    return;
+  }
+
+  spinner.classList.remove('d-none');
+  icon.classList.add('d-none');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/admin/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+      body: JSON.stringify({ currentPassword: current, newPassword: newPw })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Fehler beim Ändern des Passworts';
+      errorEl.classList.remove('d-none');
+      return;
+    }
+
+    successEl.textContent = 'Passwort erfolgreich geändert.';
+    successEl.classList.remove('d-none');
+    document.getElementById('changePasswordForm').reset();
+  } catch {
+    errorEl.textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.';
+    errorEl.classList.remove('d-none');
+  } finally {
+    spinner.classList.add('d-none');
+    icon.classList.remove('d-none');
+    btn.disabled = false;
+  }
 }
 
 // --- Upload ---
