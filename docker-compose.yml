@@ -13,5 +13,9 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       PORT: 3001
     volumes:
-      - /volume1/docker/Downloadcenter/uploads:/app/uploads
-      - /volume1/docker/Downloadcenter/database:/app/database
+      - dc_uploads:/app/uploads
+      - dc_database:/app/database
+
+volumes:
+  dc_uploads:
+  dc_database:

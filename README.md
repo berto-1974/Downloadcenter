@@ -84,7 +84,17 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Die Daten (Uploads + Datenbank) werden in Docker-Volumes persistiert.
+Die Daten (Uploads + Datenbank) werden in **Named Volumes** (`dc_uploads`, `dc_database`) persistiert, die Docker intern verwaltet.
+
+Wer eigene Host-Pfade bevorzugt (z. B. auf einem NAS), ersetzt die Volume-Sektion in der `docker-compose.yml`:
+
+```yaml
+# Eigene Pfade statt Named Volumes:
+volumes:
+  - /dein/pfad/uploads:/app/uploads
+  - /dein/pfad/database:/app/database
+# Den volumes:-Block am Ende der Datei dann entfernen.
+```
 
 ## Konfiguration
 
