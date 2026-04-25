@@ -613,6 +613,34 @@ body {
   background-color: rgba(139,92,246,0.04);
 }
 
+/* Shiny Button — Light Mode (weiß mit dunklem Effektrand) */
+[data-bs-theme="light"] .shiny-btn {
+  --shiny-bg:        #ffffff;
+  --shiny-bg-subtle: #f5f3ff;
+  --shiny-fg:        #1e1b4b;
+  --shiny-hl:        #6d28d9;
+  --shiny-hl-subtle: #7C3AED;
+}
+
+/* Datei-Meta (Dateigröße) im Light Mode sichtbar */
+[data-bs-theme="light"] .file-meta {
+  color: rgba(0,0,0,0.50);
+}
+
+/* Datei-Thumbnails im Light Mode */
+[data-bs-theme="light"] .file-thumb {
+  background: rgba(109,40,217,0.05);
+  border-color: rgba(109,40,217,0.14);
+}
+
+[data-bs-theme="light"] .file-thumb-generic i {
+  color: rgba(71,85,105,0.55);
+}
+
+[data-bs-theme="light"] .file-thumb-label {
+  color: rgba(0,0,0,0.35);
+}
+
 
 /* ===================================================
    SHINY BUTTON — rotierender Conic-Gradient-Rand
