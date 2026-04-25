@@ -631,6 +631,16 @@ body {
   background-color: rgba(139,92,246,0.04);
 }
 
+/* Icon Circle — Light Mode */
+[data-bs-theme="light"] .icon-circle.bg-primary {
+  background: rgba(109,40,217,0.10) !important;
+  border: 1px solid rgba(109,40,217,0.20);
+}
+
+[data-bs-theme="light"] .icon-circle.bg-primary i {
+  color: #6d28d9 !important;
+}
+
 /* Shiny Button — Light Mode (weiß mit dunklem Effektrand) */
 [data-bs-theme="light"] .shiny-btn {
   --shiny-bg:        #ffffff;
