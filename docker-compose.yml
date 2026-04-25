@@ -9,8 +9,8 @@ services:
       - "3001:3001"
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin}
-      JWT_SECRET: ${JWT_SECRET}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET:-Bitte_JWT_SECRET_ändern}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-Bitte_ENCRYPTION_KEY_ändern}
       PORT: 3001
     # Einhängepunkte: Volume-Name → Pfad im Container
     volumes:
