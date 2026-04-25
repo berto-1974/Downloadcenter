@@ -110,6 +110,7 @@ function createFileCard(file) {
   } else {
     preview = `<div class="file-preview">
       <div class="preview-icon">${getFileIcon(file.mimetype)}</div>
+      <span class="file-preview-label">${getFileLabel(file.mimetype)}</span>
     </div>`;
   }
 
@@ -199,6 +200,43 @@ function formatFileSize(bytes) {
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function getFileLabel(mimetype) {
+  const map = {
+    'application/zip':                                                             'ZIP',
+    'application/x-zip-compressed':                                               'ZIP',
+    'application/x-rar-compressed':                                               'RAR',
+    'application/vnd.rar':                                                        'RAR',
+    'application/x-7z-compressed':                                                '7Z',
+    'application/x-tar':                                                          'TAR',
+    'application/gzip':                                                           'GZ',
+    'application/msword':                                                         'DOC',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document':   'DOCX',
+    'application/vnd.ms-excel':                                                   'XLS',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':         'XLSX',
+    'application/vnd.ms-powerpoint':                                              'PPT',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PPTX',
+    'text/plain':                                                                  'TXT',
+    'text/csv':                                                                    'CSV',
+    'text/html':                                                                   'HTML',
+    'application/json':                                                            'JSON',
+    'application/xml':                                                             'XML',
+    'text/xml':                                                                    'XML',
+    'video/mp4':                                                                   'MP4',
+    'video/quicktime':                                                             'MOV',
+    'video/x-msvideo':                                                             'AVI',
+    'video/webm':                                                                  'WEBM',
+    'audio/mpeg':                                                                  'MP3',
+    'audio/mp4':                                                                   'M4A',
+    'audio/wav':                                                                   'WAV',
+    'audio/flac':                                                                  'FLAC',
+    'audio/ogg':                                                                   'OGG',
+  };
+  if (!mimetype) return 'FILE';
+  if (map[mimetype]) return map[mimetype];
+  const sub = (mimetype.split('/')[1] || '').split(';')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  return sub.slice(0, 5) || 'FILE';
 }
 
 function getFileIcon(mimetype) {

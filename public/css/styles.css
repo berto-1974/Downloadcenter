@@ -201,6 +201,11 @@ body {
   color: #f87171;
 }
 
+.file-thumb-generic {
+  flex-direction: column;
+  gap: 2px;
+}
+
 .file-thumb-generic i {
   font-size: 1.4rem;
   color: rgba(255,255,255,0.28);
