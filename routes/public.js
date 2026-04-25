@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
+const archiver = require('archiver');
 const { getDb } = require('../lib/db');
 const { decryptStream } = require('../lib/crypto');
 
@@ -91,6 +92,50 @@ router.get('/preview/:fileId', (req, res) => {
     stream.pipe(res);
   } else {
     res.sendFile(filePath);
+  }
+});
+
+// POST /api/download-all — alle Dateien einer Gruppe als ZIP herunterladen
+router.post('/download-all', async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: 'Passwort erforderlich' });
+
+    const db = getDb();
+    const groups = db.prepare('SELECT * FROM upload_groups').all();
+    let matchedGroup = null;
+    for (const group of groups) {
+      const match = await bcrypt.compare(password, group.password_hash);
+      if (match) { matchedGroup = group; break; }
+    }
+    if (!matchedGroup) return res.status(401).json({ error: 'Falsches Passwort' });
+
+    const files = db.prepare('SELECT * FROM files WHERE group_id = ?').all(matchedGroup.id);
+    if (files.length === 0) return res.status(404).json({ error: 'Keine Dateien vorhanden' });
+
+    const safeName = matchedGroup.name.replace(/[^\w\-äöüÄÖÜß ]/g, '_');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeName)}.zip"`);
+    res.setHeader('Content-Type', 'application/zip');
+
+    const archive = archiver('zip', { zlib: { level: 6 } });
+    archive.on('error', (err) => { if (!res.headersSent) res.status(500).end(); });
+    archive.pipe(res);
+
+    for (const file of files) {
+      const filePath = path.join(UPLOADS_DIR, file.stored_name);
+      if (!fs.existsSync(filePath)) continue;
+      if (file.encrypted && file.iv) {
+        const [ivHex, authTagHex] = file.iv.split(':');
+        archive.append(decryptStream(filePath, ivHex, authTagHex), { name: file.original_name });
+      } else {
+        archive.file(filePath, { name: file.original_name });
+      }
+    }
+
+    await archive.finalize();
+  } catch (err) {
+    console.error('ZIP-Fehler:', err);
+    if (!res.headersSent) res.status(500).json({ error: 'Interner Serverfehler' });
   }
 });
 

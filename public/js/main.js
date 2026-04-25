@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('passwordForm').addEventListener('submit', handlePasswordSubmit);
   document.getElementById('backBtn').addEventListener('click', showPasswordSection);
   document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+  document.getElementById('downloadAllBtn').addEventListener('click', downloadAll);
 });
 
 async function handlePasswordSubmit(e) {
@@ -59,6 +60,10 @@ function showFiles(group, files) {
   document.getElementById('fileCount').textContent =
     files.length === 0 ? 'Keine Dateien vorhanden' :
     files.length === 1 ? '1 Datei' : `${files.length} Dateien`;
+
+  const dlAllBtn = document.getElementById('downloadAllBtn');
+  if (files.length > 1) dlAllBtn.classList.remove('d-none');
+  else dlAllBtn.classList.add('d-none');
 
   renderFiles(files);
 }
@@ -179,6 +184,48 @@ async function confirmDelete() {
     btn.disabled = false;
     btn.innerHTML = '<i class="bi bi-trash me-1"></i>Löschen';
     deleteFileId = null;
+  }
+}
+
+async function downloadAll() {
+  const btn = document.getElementById('downloadAllBtn');
+  const spinner = document.getElementById('downloadAllSpinner');
+  const icon = document.getElementById('downloadAllIcon');
+
+  btn.disabled = true;
+  spinner.classList.remove('d-none');
+  icon.classList.add('d-none');
+
+  try {
+    const res = await fetch('/api/download-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: currentPassword })
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || 'Fehler beim Herunterladen');
+      return;
+    }
+
+    const blob = await res.blob();
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? decodeURIComponent(match[1]) : 'dateien.zip';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    alert('Verbindungsfehler. Bitte versuchen Sie es erneut.');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.add('d-none');
+    icon.classList.remove('d-none');
   }
 }
 
