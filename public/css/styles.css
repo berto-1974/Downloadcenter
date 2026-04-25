@@ -65,6 +65,28 @@ body {
   padding-bottom: 0.6rem;
 }
 
+.navbar-logo-wrap {
+  perspective: 900px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  animation: navbar-spinY 18s linear infinite;
+  transform-origin: center center;
+  will-change: transform;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22));
+}
+
+@keyframes navbar-spinY {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-logo { animation: none; }
+}
+
 .navbar-title {
   font-family: 'Syne', sans-serif;
   font-size: 1.65rem;
