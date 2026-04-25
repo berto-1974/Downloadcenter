@@ -12,10 +12,16 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       PORT: 3001
+    # Einhängepunkte: Volume-Name → Pfad im Container
     volumes:
       - dc_uploads:/app/uploads
       - dc_database:/app/database
 
+# Deklaration der Named Volumes (wird von Docker verwaltet).
+# Für eigene Host-Pfade (z.B. NAS) die zwei Zeilen oben ersetzen durch:
+#   - /dein/pfad/uploads:/app/uploads
+#   - /dein/pfad/database:/app/database
+# und diesen Block hier entfernen.
 volumes:
   dc_uploads:
   dc_database:
