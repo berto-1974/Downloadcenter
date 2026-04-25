@@ -61,8 +61,24 @@ body {
 
 /* ===== Navbar ===== */
 .navbar {
-  padding-top: 0.6rem;
-  padding-bottom: 0.6rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  position: relative;
+}
+
+.navbar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(139,92,246,0.55) 30%,
+    rgba(196,181,253,0.70) 50%,
+    rgba(139,92,246,0.55) 70%,
+    transparent 100%);
 }
 
 .navbar-logo-wrap {
@@ -75,7 +91,9 @@ body {
   animation: navbar-spinY 18s linear infinite;
   transform-origin: center center;
   will-change: transform;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22));
+  filter:
+    drop-shadow(0 0 10px rgba(139,92,246,0.45))
+    drop-shadow(0 4px 14px rgba(0,0,0,0.30));
 }
 
 @keyframes navbar-spinY {
@@ -87,16 +105,32 @@ body {
   .navbar-logo { animation: none; }
 }
 
+.navbar-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .navbar-title {
   font-family: 'Syne', sans-serif;
-  font-size: 1.65rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   line-height: 1;
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(196,181,253,0.80) 100%);
+  background: linear-gradient(130deg, #ffffff 0%, #e9d5ff 50%, #c4b5fd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.navbar-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(167,139,250,0.65);
+  margin-top: 1px;
 }
 
 /* ===== Icon Circle ===== */
@@ -336,11 +370,19 @@ body {
 
 /* Navbar */
 [data-bs-theme="dark"] .navbar {
-  background-color: rgba(9,9,11,0.82) !important;
+  background: linear-gradient(180deg, rgba(15,10,25,0.92) 0%, rgba(9,9,11,0.85) 100%) !important;
   backdrop-filter: var(--dc-blur);
   -webkit-backdrop-filter: var(--dc-blur);
-  border-bottom: 1px solid var(--dc-border) !important;
-  box-shadow: none !important;
+  border-bottom: none !important;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.45) !important;
+}
+
+[data-bs-theme="light"] .navbar {
+  background: linear-gradient(180deg, rgba(30,20,50,0.97) 0%, rgba(20,10,40,0.95) 100%) !important;
+  backdrop-filter: var(--dc-blur);
+  -webkit-backdrop-filter: var(--dc-blur);
+  border-bottom: none !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.22) !important;
 }
 
 /* Cards */
