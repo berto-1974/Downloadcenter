@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
     showAdminDashboard();
   }
 
+  const changePwCollapse = document.getElementById('changePwCollapse');
+  changePwCollapse.addEventListener('show.bs.collapse', () => {
+    document.getElementById('changePwChevron').className = 'bi bi-chevron-up text-muted';
+  });
+  changePwCollapse.addEventListener('hide.bs.collapse', () => {
+    document.getElementById('changePwChevron').className = 'bi bi-chevron-down text-muted';
+  });
+
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
   document.getElementById('logoutBtn').addEventListener('click', logout);
   document.getElementById('uploadForm').addEventListener('submit', handleUpload);
