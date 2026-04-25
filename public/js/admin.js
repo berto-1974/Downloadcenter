@@ -321,13 +321,17 @@ async function toggleGroupFiles(groupId) {
         ${data.files.map(f => `
           <div class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center"
                id="admin-file-${f.id}">
-            <div class="d-flex align-items-center gap-2 text-truncate">
-              <i class="bi bi-file-earmark text-secondary flex-shrink-0"></i>
-              <span class="small text-truncate">${escapeHtml(f.original_name)}</span>
-              <span class="text-muted small flex-shrink-0">${formatFileSize(f.size)}</span>
-              ${f.encrypted ? '<i class="bi bi-lock-fill text-warning flex-shrink-0" title="Verschlüsselt"></i>' : ''}
+            <div class="d-flex align-items-center gap-3 min-w-0">
+              ${fileThumbnail(f)}
+              <div class="min-w-0">
+                <div class="small text-truncate fw-medium">${escapeHtml(f.original_name)}</div>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="file-meta">${formatFileSize(f.size)}</span>
+                  ${f.encrypted ? '<i class="bi bi-lock-fill text-warning" style="font-size:.7rem" title="Verschlüsselt"></i>' : ''}
+                </div>
+              </div>
             </div>
-            <div class="d-flex gap-1 flex-shrink-0 ms-2">
+            <div class="d-flex gap-1 flex-shrink-0 ms-3">
               <a href="/api/download/${f.id}" class="btn btn-outline-primary btn-sm" download title="Herunterladen">
                 <i class="bi bi-download"></i>
               </a>
@@ -447,4 +451,31 @@ function formatFileSize(bytes) {
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function fileThumbnail(f) {
+  if (f.mimetype && f.mimetype.startsWith('image/')) {
+    return `<div class="file-thumb">
+      <img src="/api/preview/${f.id}" alt="" loading="lazy">
+    </div>`;
+  }
+  if (f.mimetype === 'application/pdf') {
+    return `<div class="file-thumb file-thumb-pdf">
+      <i class="bi bi-file-pdf"></i>
+      <span class="file-thumb-label">PDF</span>
+    </div>`;
+  }
+  const iconMap = {
+    'application/zip': 'bi-file-zip', 'application/x-zip-compressed': 'bi-file-zip',
+    'application/msword': 'bi-file-word', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'bi-file-word',
+    'application/vnd.ms-excel': 'bi-file-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'bi-file-excel',
+    'video/': 'bi-file-play', 'audio/': 'bi-file-music', 'text/': 'bi-file-text',
+  };
+  let icon = 'bi-file-earmark';
+  for (const [key, val] of Object.entries(iconMap)) {
+    if ((f.mimetype || '').startsWith(key)) { icon = val; break; }
+  }
+  return `<div class="file-thumb file-thumb-generic">
+    <i class="bi ${icon}"></i>
+  </div>`;
 }
