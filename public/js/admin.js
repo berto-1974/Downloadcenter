@@ -266,7 +266,7 @@ function createGroupCard(group) {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
   return `
-    <div class="card border-0 bg-light mb-3" id="group-card-${group.id}">
+    <div class="card border-0 group-item-card mb-3" id="group-card-${group.id}">
       <div class="card-body p-3">
         <div class="d-flex justify-content-between align-items-center">
           <div>
