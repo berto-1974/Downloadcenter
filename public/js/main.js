@@ -89,20 +89,29 @@ function renderFiles(files) {
 
 function createFileCard(file) {
   const isImage = file.mimetype.startsWith('image/');
+  const isPdf   = file.mimetype === 'application/pdf';
   const sizeFormatted = formatFileSize(file.size);
   const dateFormatted = new Date(file.created_at).toLocaleDateString('de-DE', {
     day: '2-digit', month: '2-digit', year: 'numeric'
   });
 
-  const preview = isImage
-    ? `<div class="file-preview">
-         <img src="/api/preview/${file.id}" alt="${escapeHtml(file.original_name)}"
-              class="img-thumbnail-preview" loading="lazy"
-              onerror="this.parentElement.innerHTML='<div class=\\'preview-icon\\'><i class=\\'bi bi-image text-muted\\'></i></div>'">
-       </div>`
-    : `<div class="file-preview d-flex align-items-center justify-content-center">
-         <div class="preview-icon">${getFileIcon(file.mimetype)}</div>
-       </div>`;
+  let preview;
+  if (isImage) {
+    preview = `<div class="file-preview">
+      <img src="/api/preview/${file.id}" alt="${escapeHtml(file.original_name)}"
+           class="img-thumbnail-preview" loading="lazy"
+           onerror="this.parentElement.innerHTML='<div class=\\'preview-icon\\'><i class=\\'bi bi-image text-muted\\'></i></div>'">
+    </div>`;
+  } else if (isPdf) {
+    preview = `<div class="file-preview file-preview-pdf">
+      <i class="bi bi-file-earmark-pdf" style="font-size:3rem;color:#f87171"></i>
+      <span class="file-preview-label">PDF</span>
+    </div>`;
+  } else {
+    preview = `<div class="file-preview">
+      <div class="preview-icon">${getFileIcon(file.mimetype)}</div>
+    </div>`;
+  }
 
   return `
     <div class="col-sm-6 col-md-4 col-lg-3" id="file-card-${file.id}">
